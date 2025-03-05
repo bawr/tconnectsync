@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from enum import Enum, IntFlag
 from .raw_event import RawEvent, BaseEvent
+from .raw_event import TANDEM_EPOCH, TIMEZONE_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -4695,7 +4696,10 @@ class LidCgmDataG7(BaseEvent):
 
     @property
     def eventTimestamp(self):
-        return self.raw.timestamp
+        if self.egvInfoBitmaskRaw & self.EgvinfobitmaskBitmask.ValidTimestamp:
+            return arrow.get(TANDEM_EPOCH + self.egvTimestamp, tzinfo='UTC').replace(tzinfo=TIMEZONE_NAME)
+        else:
+            return self.raw.timestamp
 
     @property
     def seqNum(self):
